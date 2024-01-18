@@ -5,15 +5,14 @@
 
 #define BUFFER_SIZE 4096
 
-void processFile(FILE *fp, int bflag, int eflag, int nflag, int sflag);
-void printUsageAndExit(char *programName);
+void processFile(FILE *file, int bflag, int eflag, int nflag, int sflag);
 
-int main(int argc, char **argv) {
+int main(int argc, char *argv[]) {
     int bflag = 0, eflag = 0, nflag = 0, sflag = 0;
-    int opt;
+    int flags;
 
-    while ((opt = getopt(argc, argv, "bens?")) != -1) {
-        switch(opt) {
+    while ((flags = getopt(argc, argv, "bens")) != -1) {
+        switch(flags) {
             case 'b':
                 bflag++;
                 break;
@@ -26,22 +25,21 @@ int main(int argc, char **argv) {
             case 's':
                 sflag++;
                 break;
-            case '?':
-                printUsageAndExit(argv[0]);
         }
     }
 
-    int currentFileIndex = optind;
+    int currentFileIndex = optind; // Индекс аргумента, который является файлом. Отрабатывает, когда флаги заканчиваются или их не было найдено
 
-    while (currentFileIndex < argc) {
-        FILE *fp = fopen(argv[currentFileIndex], "rb");
-        if (fp == NULL) {
-            fprintf(stderr, "%s: %s: No such file or directory\n", argv[0], argv[currentFileIndex]);
+    while (currentFileIndex < argc) { // Этот цикл необходим для обработки нескольких файлов последовательно
+        FILE *file = fopen(argv[currentFileIndex], "rb");
+        if (file == NULL) {
+            fprintf(stderr, "%s: %s: No such file or directory\n", argv[0], argv[currentFileIndex]); // Выводится название исполняемого файла, 
+            // название текущего файла, который не был найдет и текст ошибки.
             exit(1);
         }
 
-        processFile(fp, bflag, eflag, nflag, sflag);
-        fclose(fp);
+        processFile(file, bflag, eflag, nflag, sflag);
+        fclose(file);
 
         currentFileIndex++;
     }
@@ -49,13 +47,13 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-void processFile(FILE *fp, int bflag, int eflag, int nflag, int sflag) {
-    const int bufferSize = BUFFER_SIZE;
+void processFile(FILE *file, int bflag, int eflag, int nflag, int sflag) {
+    const int bufferSize = BUFFER_SIZE; // Надо подумать как избавиться от этого
     char buffer[bufferSize];
     int lastLineBlank = 0;
     int lineNumber = 1;
 
-    while (fgets(buffer, bufferSize, (fp == NULL ? stdin : fp))) {
+    while (fgets(buffer, bufferSize, (file == NULL ? stdin : file))) { // Стандартный ввод нам необязательно обрабатывать, поэтому можно будет убрать
         int length = strlen(buffer);
         buffer[length - 1] = '\0';
 
@@ -91,7 +89,8 @@ void processFile(FILE *fp, int bflag, int eflag, int nflag, int sflag) {
     }
 }
 
-void printUsageAndExit(char *programName) {
-    printf("usage: %s [-bens] [file ...]\n", programName);
-    exit(1);
-}
+
+// Добавить: E, t, T, A, v, флаг b реализован некорректно
+// Сделать обработку краевых ситуаций по типу неизвестного флага
+// Придумать как в case запихнуть длинные названия флагов
+// Устранить ошибку, что после использования неизвестного флага, файл все равно открывается
