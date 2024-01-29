@@ -1,5 +1,3 @@
-// ВСЁ КРОМЕ -е ОТЛИЧНО РАБОТАЕТ !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!
-
 #define _GNU_SOURCE
 
 #include <stdio.h>
@@ -11,7 +9,7 @@
 #define ANSI_COLOR_RED "\033[1;31m"
 #define ANSI_COLOR_RESET "\x1b[0m"
 
-void parse_args(int argc, char *argv[], int *e_flag, int *i_flag, int *v_flag, int *c_flag, int *l_flag, int *n_flag, int *h_flag, int *s_flag, int *f_flag, int *o_flag);
+void parse_args(int argc, char *argv[], int *e_flag, int *i_flag, int *v_flag, int *c_flag, int *l_flag, int *n_flag, int *h_flag, int *s_flag, int *f_flag, int *o_flag, char **e_arg);
 FILE *open_file(const char *filename, char *argv[], int s_flag);
 void finder(FILE *file, const char *filename, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int e_flag, int l_flag, int h_flag, int o_flag, int file_counter);
 void process_v_flag(char *buffer, char *required_data, int v_flag, int i_flag, int *line_number, int n_flag, int h_flag, int *smth_found, int file_counter, const char *filename);
@@ -21,9 +19,17 @@ void process_o_flag (char *buffer, char *required_data, int o_flag, int i_flag, 
 
 int main(int argc, char *argv[]){
     int file_counter = 0;
+    char *required_data = NULL;
+    char *e_arg = NULL;
     int e_flag = 0, i_flag = 0, v_flag = 0, c_flag = 0, l_flag = 0, n_flag = 0, h_flag = 0, s_flag = 0, f_flag = 0, o_flag = 0; 
-    parse_args(argc, argv, &e_flag, &i_flag, &v_flag, &c_flag, &l_flag, &n_flag, &h_flag, &s_flag, &f_flag, &o_flag);
-    char *required_data = argv[optind];
+    parse_args(argc, argv, &e_flag, &i_flag, &v_flag, &c_flag, &l_flag, &n_flag, &h_flag, &s_flag, &f_flag, &o_flag, &e_arg);
+    if (!e_flag) {
+        required_data = argv[optind];
+    }
+    if (e_flag) {
+        required_data = e_arg;
+        optind-=1;
+    }
     if (argc - optind > 2) {
         file_counter = 1;
     }
@@ -35,12 +41,13 @@ int main(int argc, char *argv[]){
     return 0;
 }
 
-void parse_args(int argc, char *argv[], int *e_flag, int *i_flag, int *v_flag, int *c_flag, int *l_flag, int *n_flag, int *h_flag, int *s_flag, int *f_flag, int *o_flag){
+void parse_args(int argc, char *argv[], int *e_flag, int *i_flag, int *v_flag, int *c_flag, int *l_flag, int *n_flag, int *h_flag, int *s_flag, int *f_flag, int *o_flag, char **e_arg){
     int flags;
     while((flags = getopt(argc, argv, "e:ivclnhsfo")) != -1){
         switch(flags){
             case 'e':
                 (*e_flag)++;
+                *e_arg = optarg;
                 break;
             case 'i':
                 (*i_flag)++;
@@ -283,67 +290,3 @@ void process_o_flag(char *buffer, char *required_data, int o_flag, int i_flag, i
         free(tmp); 
     }
 }
-
-
-// // РАБОТАЕТ, НАДО РАЗОБРАТЬСЯ
-// void finder(FILE *file, char *required_data) {
-//     char *buffer = NULL;
-//     size_t buffer_size = 0;
-    
-//     while ((getline(&buffer, &buffer_size, file) != -1)) {
-//         char *match = buffer;
-//         char *next_match;
-//         int match_found = 0;
-
-//         while ((next_match = strstr(match, required_data)) != NULL) {
-//             size_t prefix_len = next_match - match;
-
-//             // Вывод префикса
-//             if (prefix_len > 0) {
-//                 fwrite(match, 1, prefix_len, stdout);
-//             }
-
-//             // Выделение найденного текста красным цветом
-//             fprintf(stdout, "%s%s%s", ANSI_COLOR_RED, required_data, ANSI_COLOR_RESET);
-
-//             // Перемещение указателя на следующий символ после найденной подстроки
-//             match = next_match + strlen(required_data);
-
-//             match_found = 1;
-//         }
-
-//         // Вывод оставшейся части строки, если не найдено больше совпадений
-//         if (match_found && *match != '\0') {
-//             fputs(match, stdout);
-//         }
-//     }
-// }
-
-
-// С флагом -e пока не ебу, что делать
-// У флага -n нет зеленого цвета
-// Нет выделения вхождений красным цветом
-
-// Вывод -l не фиолетовый
-// Переставить флаги в функциях вместе
-// Попробовать сократить функцию process_n_flag() до 50 строк, чтобы соответствовать принципам структурного программирования
-
-// Пофиксить не проверку последнего файла:
-// user@DESKTOP-FPE95AJ:/mnt/c/Users/q/Desktop/School21/SimpleBushUtils (Cat Grep)/C3_SimpleBashUtils-1/src/grep$ ./my_grep -s exit a.txt b.txt o.txt c.txt
-// b.txt:  -V, --version             display version information and exit
-// b.txt:      --help                display this help text and exit
-// b.txt:if any error occurs and -q is not given, the exit status is 2.
-// user@DESKTOP-FPE95AJ:/mnt/c/Users/q/Desktop/School21/SimpleBushUtils (Cat Grep)/C3_SimpleBashUtils-1/src/grep$ grep -s exit a.txt b.txt o.txt c.txt
-// b.txt:  -V, --version             display version information and exit
-// b.txt:      --help                display this help text and exit
-// b.txt:if any error occurs and -q is not given, the exit status is 2.
-// c.txt:exit gdvffg
-
-// При использовании -о текст должен быть красного цвета
-// strcasestr работает только с английским текстом
-
-// Доработать -o -n:
-// user@DESKTOP-FPE95AJ:/mnt/c/Users/q/Desktop/School21/SimpleBushUtils (Cat Grep)/C3_SimpleBashUtils-1/src/grep$ ./my_grep -o -i -n "when file" b.txt c.txt
-// b.txt:When FILE
-// user@DESKTOP-FPE95AJ:/mnt/c/Users/q/Desktop/School21/SimpleBushUtils (Cat Grep)/C3_SimpleBashUtils-1/src/grep$ grep -o -i -n "when file" b.txt c.txt
-// b.txt:62:When FILE
