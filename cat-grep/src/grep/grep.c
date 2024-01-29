@@ -195,7 +195,7 @@ void process_n_flag(char *buffer, char *required_data, int n_flag, int *line_num
                 if (file_counter && !h_flag) {
                     sprintf(buffer, "%s:%d:", filename, *line_number);
                 }
-                if (!file_counter && !h_flag) {
+                if (!file_counter) {
                     sprintf(buffer, "%d:", *line_number);
                 }
                 strcat(buffer, tmp);
@@ -210,7 +210,7 @@ void process_n_flag(char *buffer, char *required_data, int n_flag, int *line_num
                 if (file_counter && !h_flag) {
                     sprintf(buffer, "%s:%d:", filename, *line_number);
                 }
-                if (!file_counter && !h_flag) {
+                if (!file_counter) {
                     sprintf(buffer, "%d:", *line_number);
                 }
                 sprintf(buffer, "%d:", *line_number);
@@ -226,7 +226,7 @@ void process_n_flag(char *buffer, char *required_data, int n_flag, int *line_num
                 if (file_counter && !h_flag) {
                     sprintf(buffer, "%s:%d:", filename, *line_number);
                 }
-                if (!file_counter && !h_flag) {
+                if (!file_counter) {
                     sprintf(buffer, "%d:", *line_number);
                 }
                 strcat(buffer, tmp);
@@ -241,7 +241,7 @@ void process_n_flag(char *buffer, char *required_data, int n_flag, int *line_num
                 if (file_counter && !h_flag) {
                     sprintf(buffer, "%s:%d:", filename, *line_number);
                 }
-                if (!file_counter && !h_flag) {
+                if (!file_counter) {
                     sprintf(buffer, "%d:", *line_number);
                 }
                 strcat(buffer, tmp);
@@ -262,8 +262,18 @@ void process_o_flag(char *buffer, char *required_data, int o_flag, int i_flag, i
         if (!i_flag) {
             if (strstr(tmp, required_data) != NULL) {
                 if (file_counter && !h_flag) {
+                    if (!n_flag) {
                         sprintf(buffer, "%s:", filename);
                     }
+                    if (n_flag) {
+                        sprintf(buffer, "%s:%d:", filename, *line_number);
+                    }
+                }
+                if (!file_counter) {
+                    if(n_flag) {
+                        sprintf(buffer, "%d:", *line_number);
+                    }
+                }
                 strcat(buffer, required_data);
                 strcat(buffer, "\n");  // Добавляем символ новой строки
                 (*smth_found) = 1;
@@ -276,7 +286,17 @@ void process_o_flag(char *buffer, char *required_data, int o_flag, int i_flag, i
             char *found_str = strcasestr(tmp, required_data);
             if (found_str != NULL) {
                 if (file_counter && !h_flag) {
-                    sprintf(buffer, "%s:", filename);
+                    if (!n_flag) {
+                        sprintf(buffer, "%s:", filename);
+                    }
+                    if (n_flag) {
+                        sprintf(buffer, "%s:%d:", filename, *line_number);
+                    }
+                }
+                if (!file_counter) {
+                    if(n_flag) {
+                        sprintf(buffer, "%d:", *line_number);
+                    }
                 }
                 strncat(buffer, found_str, strlen(required_data));
                 strcat(buffer, "\n");  // Добавляем символ новой строки
@@ -286,7 +306,28 @@ void process_o_flag(char *buffer, char *required_data, int o_flag, int i_flag, i
                 }
             }
         }
-
         free(tmp); 
     }
 }
+
+
+// У флага -n нет зеленого цвета
+// Нет выделения вхождений красным цветом
+// Нет повторного вхождения в строку
+// Вывод -l не фиолетовый
+// Переставить флаги в функциях вместе
+// Попробовать сократить функцию process_n_flag() до 50 строк, чтобы соответствовать принципам структурного программирования
+
+// Пофиксить не проверку последнего файла:
+// user@DESKTOP-FPE95AJ:/mnt/c/Users/q/Desktop/School21/SimpleBushUtils (Cat Grep)/C3_SimpleBashUtils-1/src/grep$ ./my_grep -s exit a.txt b.txt o.txt c.txt
+// b.txt:  -V, --version             display version information and exit
+// b.txt:      --help                display this help text and exit
+// b.txt:if any error occurs and -q is not given, the exit status is 2.
+// user@DESKTOP-FPE95AJ:/mnt/c/Users/q/Desktop/School21/SimpleBushUtils (Cat Grep)/C3_SimpleBashUtils-1/src/grep$ grep -s exit a.txt b.txt o.txt c.txt
+// b.txt:  -V, --version             display version information and exit
+// b.txt:      --help                display this help text and exit
+// b.txt:if any error occurs and -q is not given, the exit status is 2.
+// c.txt:exit gdvffg
+
+// При использовании -о текст должен быть красного цвета
+// strcasestr работает только с английским текстом
