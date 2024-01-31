@@ -11,7 +11,7 @@
 void parse_args(int argc, char *argv[], int *e_flag, int *i_flag, int *v_flag, int *c_flag, int *l_flag, int *n_flag, int *h_flag, int *s_flag, int *f_flag, int *o_flag, char **e_arg, char **f_arg);
 FILE *open_file(const char *filename, char *argv[], int s_flag);
 char* strcasestr(const char* haystack, const char* needle);
-void finder(FILE *file, const char *filename, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int e_flag, int l_flag, int h_flag, int o_flag, int file_counter, int f_flag);
+void finder(FILE *file, const char *filename, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int e_flag, int l_flag, int h_flag, int o_flag, int file_counter);
 void process_v_flag(char *buffer, char *required_data, int v_flag, int i_flag, int *line_number, int n_flag, int h_flag, int *smth_found, int file_counter, const char *filename);
 void process_i_flag(char *buffer, char *required_data, int i_flag, int *line_number, int n_flag, int v_flag, int h_flag, int *smth_found, int file_counter, const char *filename);
 void process_n_flag(char *buffer, char *required_data, int n_flag, int *line_number, int i_flag, int c_flag, int v_flag, int h_flag, int *smth_found, int file_counter, const char *filename);
@@ -44,7 +44,7 @@ int main(int argc, char *argv[]){
             
             for (int j = optind + 1; j < argc; j++) {
                 FILE *file = open_file(argv[j], argv, s_flag);
-                finder(file, argv[j], required_data, v_flag, i_flag, c_flag, n_flag, e_flag, l_flag, h_flag, o_flag, file_counter, f_flag);
+                finder(file, argv[j], required_data, v_flag, i_flag, c_flag, n_flag, e_flag, l_flag, h_flag, o_flag, file_counter);
             }
         }
 
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]){
     }
     for (int i = optind + 1; i < argc; i++){
         FILE *file = open_file(argv[i], argv, s_flag);
-        finder(file, argv[i], required_data, v_flag, i_flag, c_flag, n_flag, e_flag, l_flag, h_flag, o_flag, file_counter, f_flag);
+        finder(file, argv[i], required_data, v_flag, i_flag, c_flag, n_flag, e_flag, l_flag, h_flag, o_flag, file_counter);
         fclose(file);
     }
     return 0;
@@ -120,7 +120,7 @@ FILE *open_file(const char *filename, char *argv[], int s_flag){
     return file;
 }
 
-void finder(FILE *file, const char *filename, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int e_flag, int l_flag, int h_flag, int o_flag, int file_counter, int f_flag){
+void finder(FILE *file, const char *filename, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int e_flag, int l_flag, int h_flag, int o_flag, int file_counter){
     char *buffer = NULL;
     size_t buffer_size = 0;
     int line_number = 0;
@@ -132,7 +132,7 @@ void finder(FILE *file, const char *filename, char *required_data, int v_flag, i
         process_i_flag(buffer, required_data, i_flag, &line_number, n_flag, v_flag, h_flag, &smth_found, file_counter, filename);
         process_o_flag(buffer, required_data, o_flag, i_flag, &line_number, n_flag, h_flag, &smth_found, file_counter, filename);
 
-        if(!v_flag && !i_flag && !n_flag && !o_flag && !f_flag) {
+        if(!v_flag && !i_flag && !n_flag && !o_flag) {
 
             char *tmp = strdup(buffer);
             buffer[0] = '\0';
@@ -407,4 +407,4 @@ char** process_f_flag(char *filename, size_t *num_lines, int s_flag, char *argv[
 
 // При использовании -о текст должен быть красного цвета
 // strcasestr работает только с английским текстом
-// флаг -f работает только в одиночку
+// флаг -f работает выводит только последнюю строку
