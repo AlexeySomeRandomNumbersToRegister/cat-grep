@@ -1,3 +1,5 @@
+// -f работает, надо просто вынести его отдельно. С другими флагами не работает пока.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,12 +13,12 @@
 void parse_args(int argc, char *argv[], int *e_flag, int *i_flag, int *v_flag, int *c_flag, int *l_flag, int *n_flag, int *h_flag, int *s_flag, int *f_flag, int *o_flag, char **e_arg, char **f_arg);
 FILE *open_file(const char *filename, char *argv[], int s_flag);
 char* strcasestr(const char* haystack, const char* needle);
-void finder(FILE *file, const char *filename, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int e_flag, int l_flag, int h_flag, int o_flag, int file_counter);
+void finder(FILE *file, const char *filename, char** f_flag_lines, size_t num_lines, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int e_flag, int l_flag, int h_flag, int o_flag, int file_counter, int f_flag);
 void process_v_flag(char *buffer, char *required_data, int v_flag, int i_flag, int *line_number, int n_flag, int h_flag, int *smth_found, int file_counter, const char *filename);
 void process_i_flag(char *buffer, char *required_data, int i_flag, int *line_number, int n_flag, int v_flag, int h_flag, int *smth_found, int file_counter, const char *filename);
 void process_n_flag(char *buffer, char *required_data, int n_flag, int *line_number, int i_flag, int c_flag, int v_flag, int h_flag, int *smth_found, int file_counter, const char *filename);
 void process_o_flag (char *buffer, char *required_data, int o_flag, int i_flag, int *line_number, int n_flag, int h_flag, int *smth_found, int file_counter, const char *filename);
-char** process_f_flag(char *filename, size_t *num_lines, int s_flag, char *argv[]);
+char** get_data_f_flag(char *filename, size_t *num_lines, int s_flag, char *argv[]);
 
 int main(int argc, char *argv[]){
     int file_counter = 0;
@@ -36,17 +38,12 @@ int main(int argc, char *argv[]){
     }
 
     if (f_flag) {
-        f_flag_lines = process_f_flag(f_arg, &num_lines, s_flag, argv);
-
-        for (int i = 0; i < num_lines; i++) {
-            required_data = f_flag_lines[i];
-            printf("Цикл: %d. Строка: %s\n", i, required_data);
+        f_flag_lines = get_data_f_flag(f_arg, &num_lines, s_flag, argv); // Массив строк, к которому можно обращаться по индексу [0], [1] ...
             
             for (int j = optind + 1; j < argc; j++) {
                 FILE *file = open_file(argv[j], argv, s_flag);
-                finder(file, argv[j], required_data, v_flag, i_flag, c_flag, n_flag, e_flag, l_flag, h_flag, o_flag, file_counter);
+                finder(file, argv[j], f_flag_lines, num_lines, required_data, v_flag, i_flag, c_flag, n_flag, e_flag, l_flag, h_flag, o_flag, file_counter, f_flag);
             }
-        }
 
         optind--; // Уменьшаем optind, чтобы пропустить -f и перейти к следующему аргументу
     }
@@ -56,7 +53,7 @@ int main(int argc, char *argv[]){
     }
     for (int i = optind + 1; i < argc; i++){
         FILE *file = open_file(argv[i], argv, s_flag);
-        finder(file, argv[i], required_data, v_flag, i_flag, c_flag, n_flag, e_flag, l_flag, h_flag, o_flag, file_counter);
+        finder(file, argv[i], f_flag_lines, num_lines, required_data, v_flag, i_flag, c_flag, n_flag, e_flag, l_flag, h_flag, o_flag, file_counter, f_flag);
         fclose(file);
     }
     return 0;
@@ -120,7 +117,7 @@ FILE *open_file(const char *filename, char *argv[], int s_flag){
     return file;
 }
 
-void finder(FILE *file, const char *filename, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int e_flag, int l_flag, int h_flag, int o_flag, int file_counter){
+void finder(FILE *file, const char *filename, char** f_flag_lines, size_t num_lines, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int e_flag, int l_flag, int h_flag, int o_flag, int file_counter, int f_flag){
     char *buffer = NULL;
     size_t buffer_size = 0;
     int line_number = 0;
@@ -131,8 +128,9 @@ void finder(FILE *file, const char *filename, char *required_data, int v_flag, i
         process_n_flag(buffer, required_data, n_flag, &line_number, i_flag, c_flag, v_flag, h_flag, &smth_found, file_counter, filename);
         process_i_flag(buffer, required_data, i_flag, &line_number, n_flag, v_flag, h_flag, &smth_found, file_counter, filename);
         process_o_flag(buffer, required_data, o_flag, i_flag, &line_number, n_flag, h_flag, &smth_found, file_counter, filename);
+        // process_f_flag(buffer, required_data, f_flag, &line_number, file_counter);
 
-        if(!v_flag && !i_flag && !n_flag && !o_flag) {
+        if(!v_flag && !i_flag && !n_flag && !o_flag && !f_flag) {
 
             char *tmp = strdup(buffer);
             buffer[0] = '\0';
@@ -143,6 +141,21 @@ void finder(FILE *file, const char *filename, char *required_data, int v_flag, i
                 strcat(buffer, tmp);
                 line_number++;
                 smth_found = 1;
+            }
+            free(tmp);
+        }
+        if (f_flag) {
+            char *tmp = strdup(buffer);
+            buffer[0] = '\0';
+            for (int i = 0; i < num_lines; i++) {
+                if(strstr(tmp, f_flag_lines[i]) != NULL){
+                    if (file_counter && !h_flag) {
+                        sprintf(buffer, "%s:", filename);
+                    }
+                    strcat(buffer, tmp);
+                    line_number++;
+                    smth_found = 1;
+                }
             }
             free(tmp);
         }
@@ -349,7 +362,7 @@ char *strcasestr(const char *haystack, const char *needle) {
     return result;
 }
 
-char** process_f_flag(char *filename, size_t *num_lines, int s_flag, char *argv[]) {
+char** get_data_f_flag(char *filename, size_t *num_lines, int s_flag, char *argv[]) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
         if (!s_flag) {
