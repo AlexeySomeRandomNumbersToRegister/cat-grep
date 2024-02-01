@@ -16,7 +16,7 @@ void process_v_flag(char *buffer, char *required_data, int v_flag, int i_flag, i
 void process_i_flag(char *buffer, char *required_data, int i_flag, int *line_number, int n_flag, int v_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag);
 void process_n_flag(char *buffer, char *required_data, int n_flag, int *line_number, int i_flag, int c_flag, int v_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag);
 void process_o_flag (char *buffer, char *required_data, int o_flag, int i_flag, int *line_number, int n_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag);
-void process_f_flag(char *buffer, size_t num_lines, char **f_flag_lines, int f_flag, int *line_number, int *v_f_counter, int file_counter, int h_flag, const char *filename, int *smth_found, int i_flag, int c_flag, int n_flag, int v_flag, int o_flag);
+void process_f_flag(char *buffer, size_t num_lines, char **f_flag_lines, int f_flag, int *line_number, int *counter, int *v_f_counter, int file_counter, int h_flag, const char *filename, int *smth_found, int i_flag, int c_flag, int n_flag, int v_flag, int o_flag);
 char** get_data_f_flag(char *filename, size_t *num_lines, int s_flag, char *argv[]);
 
 int main(int argc, char *argv[]){
@@ -123,13 +123,14 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
     size_t buffer_size = 0;
     int line_number = 0;
     int smth_found = 0;
+    int counter = 0;
 
-    while(getline(&buffer, &buffer_size, file) != -1){
+    while((getline(&buffer, &buffer_size, file)) != -1){
         process_v_flag(buffer, required_data, v_flag, i_flag, &line_number, n_flag, h_flag, &smth_found, file_counter, filename, f_flag);
         process_n_flag(buffer, required_data, n_flag, &line_number, i_flag, c_flag, v_flag, h_flag, &smth_found, file_counter, filename, f_flag);
         process_i_flag(buffer, required_data, i_flag, &line_number, n_flag, v_flag, h_flag, &smth_found, file_counter, filename, f_flag);
         process_o_flag(buffer, required_data, o_flag, i_flag, &line_number, n_flag, h_flag, &smth_found, file_counter, filename, f_flag);
-        process_f_flag(buffer, num_lines, f_flag_lines, f_flag, &line_number, v_f_counter, file_counter, h_flag, filename, &smth_found, i_flag, c_flag, n_flag, v_flag, o_flag);
+        process_f_flag(buffer, num_lines, f_flag_lines, f_flag, &line_number, &counter, v_f_counter, file_counter, h_flag, filename, &smth_found, i_flag, c_flag, n_flag, v_flag, o_flag);
 
         if(!v_flag && !i_flag && !n_flag && !o_flag && !f_flag) {
 
@@ -164,6 +165,7 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
     //             }
     //         fprintf(stdout, "%s", buffer);
     //     }
+    counter++;
     }
         if (c_flag && !l_flag && *f_cycle_counter < (argc - optind - 1)) {
             if (file_counter && !h_flag) {
@@ -347,7 +349,7 @@ void process_o_flag(char *buffer, char *required_data, int o_flag, int i_flag, i
     }
 }
 
-void process_f_flag(char *buffer, size_t num_lines, char **f_flag_lines, int f_flag, int *line_number, int *v_f_counter, int file_counter, int h_flag, const char *filename, int *smth_found, int i_flag, int c_flag, int n_flag, int v_flag, int o_flag) {
+void process_f_flag(char *buffer, size_t num_lines, char **f_flag_lines, int f_flag, int *line_number, int *counter, int *v_f_counter, int file_counter, int h_flag, const char *filename, int *smth_found, int i_flag, int c_flag, int n_flag, int v_flag, int o_flag) {
     if (f_flag) {
         char *tmp = strdup(buffer);
         if (v_flag && o_flag) {
@@ -419,6 +421,9 @@ void process_f_flag(char *buffer, size_t num_lines, char **f_flag_lines, int f_f
             }
         }
         if (v_flag && n_flag && !i_flag) {
+            if (*counter == 0) {
+                *v_f_counter = 0;
+            }
             (*v_f_counter)++;
             for (int i = 0; i < num_lines; i++) {
                 // printf("LINE NUMBER: %ld\n", num_lines);
@@ -429,9 +434,7 @@ void process_f_flag(char *buffer, size_t num_lines, char **f_flag_lines, int f_f
                 }
                 (*line_number) = (*v_f_counter);
             }
-            // if (*v_f_counter > num_lines) {
-            //     *v_f_counter = 0;
-            // }
+            // printf("COUNTER: %d\n", *counter);
         }
         if (v_flag && n_flag && i_flag) { 
             (*v_f_counter)++;
@@ -598,5 +601,4 @@ char** get_data_f_flag(char *filename, size_t *num_lines, int s_flag, char *argv
 
 // При использовании -о текст должен быть красного цвета
 // strcasestr работает только с английским текстом
-// При использовании -n -v -f флаг -n не обнуляется после начала второго файла
 // -i -v -n -f хрень какая-то
