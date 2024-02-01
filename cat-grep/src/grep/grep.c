@@ -1,3 +1,5 @@
+// ВСЁ ОТЛИЧНО РАБОТАЕТ !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!! !!! !!! !!!
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -436,9 +438,13 @@ void process_f_flag(char *buffer, size_t num_lines, char **f_flag_lines, int f_f
             }
             // printf("COUNTER: %d\n", *counter);
         }
-        if (v_flag && n_flag && i_flag) { 
+        if (v_flag && n_flag && i_flag) {
+            if (*counter == 0) {
+                *v_f_counter = 0;
+            }
             (*v_f_counter)++;
             for (int i = 0; i < num_lines; i++) {
+                // printf("LINE NUMBER: %ld\n", num_lines);
                 if(strcasestr(tmp, f_flag_lines[i]) != NULL) {
                     buffer[0] = '\0';
                     (*smth_found) = 1;
@@ -446,6 +452,7 @@ void process_f_flag(char *buffer, size_t num_lines, char **f_flag_lines, int f_f
                 }
                 (*line_number) = (*v_f_counter);
             }
+            // printf("COUNTER: %d\n", *counter);
         }
         if (v_flag && !i_flag && !o_flag && !n_flag) {
             for (int i = 0; i < num_lines; i++) {
@@ -457,7 +464,7 @@ void process_f_flag(char *buffer, size_t num_lines, char **f_flag_lines, int f_f
                 (*line_number) = num_lines + 1 - (*v_f_counter);
             }
         }
-        if (v_flag && i_flag && !o_flag) {
+        if (v_flag && i_flag && !o_flag && !n_flag) {
             for (int i = 0; i < num_lines; i++) {
                 if(strcasestr(tmp, f_flag_lines[i]) != NULL) {
                     buffer[0] = '\0';
@@ -601,4 +608,3 @@ char** get_data_f_flag(char *filename, size_t *num_lines, int s_flag, char *argv
 
 // При использовании -о текст должен быть красного цвета
 // strcasestr работает только с английским текстом
-// -i -v -n -f хрень какая-то
