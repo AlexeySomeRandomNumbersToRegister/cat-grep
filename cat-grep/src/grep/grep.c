@@ -1,4 +1,5 @@
 // ВСЁ ОТЛИЧНО РАБОТАЕТ !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!! !!! !!! !!!
+// Компилится со всеми флагами
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,13 +14,13 @@
 void parse_args(int argc, char *argv[], int *e_flag, int *i_flag, int *v_flag, int *c_flag, int *l_flag, int *n_flag, int *h_flag, int *s_flag, int *f_flag, int *o_flag, char **e_arg, char **f_arg);
 FILE *open_file(const char *filename, char *argv[], int s_flag);
 char* strcasestr(const char* haystack, const char* needle);
-void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int *f_cycle_counter, int *v_f_counter, size_t num_lines, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int e_flag, int l_flag, int h_flag, int o_flag, int file_counter, int f_flag);
+void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int *f_cycle_counter, int *v_f_counter, int num_lines, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int l_flag, int h_flag, int o_flag, int file_counter, int f_flag);
 void process_v_flag(char *buffer, char *required_data, int v_flag, int i_flag, int *line_number, int n_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag);
 void process_i_flag(char *buffer, char *required_data, int i_flag, int *line_number, int n_flag, int v_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag);
 void process_n_flag(char *buffer, char *required_data, int n_flag, int *line_number, int i_flag, int c_flag, int v_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag);
 void process_o_flag (char *buffer, char *required_data, int o_flag, int i_flag, int *line_number, int n_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag);
-void process_f_flag(char *buffer, size_t num_lines, char **f_flag_lines, int f_flag, int *line_number, int *counter, int *v_f_counter, int file_counter, int h_flag, const char *filename, int *smth_found, int i_flag, int c_flag, int n_flag, int v_flag, int o_flag);
-char** get_data_f_flag(char *filename, size_t *num_lines, int s_flag, char *argv[]);
+void process_f_flag(char *buffer, int num_lines, char **f_flag_lines, int f_flag, int *line_number, int *counter, int *v_f_counter, int file_counter, int h_flag, const char *filename, int *smth_found, int i_flag, int c_flag, int n_flag, int v_flag, int o_flag);
+char** get_data_f_flag(char *filename, int *num_lines, int s_flag, char *argv[]);
 
 int main(int argc, char *argv[]){
     int file_counter = 0;
@@ -29,7 +30,7 @@ int main(int argc, char *argv[]){
     char *e_arg = NULL;
     char *f_arg = NULL;
     char **f_flag_lines;
-    size_t num_lines;
+    int num_lines;
     int e_flag = 0, i_flag = 0, v_flag = 0, c_flag = 0, l_flag = 0, n_flag = 0, h_flag = 0, s_flag = 0, f_flag = 0, o_flag = 0; 
     parse_args(argc, argv, &e_flag, &i_flag, &v_flag, &c_flag, &l_flag, &n_flag, &h_flag, &s_flag, &f_flag, &o_flag, &e_arg, &f_arg);
     if (!e_flag && !f_flag) {
@@ -47,7 +48,7 @@ int main(int argc, char *argv[]){
                     if (argc - optind > 1) {
                         file_counter = 1;
                     }
-                finder(file, argc, argv[j], f_flag_lines, &f_cycle_counter, &v_f_counter, num_lines, required_data, v_flag, i_flag, c_flag, n_flag, e_flag, l_flag, h_flag, o_flag, file_counter, f_flag);
+                finder(file, argc, argv[j], f_flag_lines, &f_cycle_counter, &v_f_counter, num_lines, required_data, v_flag, i_flag, c_flag, n_flag, l_flag, h_flag, o_flag, file_counter, f_flag);
             }
         optind--; // Уменьшаем optind, чтобы пропустить -f и перейти к следующему аргументу
     }
@@ -56,7 +57,7 @@ int main(int argc, char *argv[]){
     }
     for (int i = optind + 1; i < argc; i++){
         FILE *file = open_file(argv[i], argv, s_flag);
-        finder(file, argc, argv[i], f_flag_lines, &f_cycle_counter, &v_f_counter, num_lines, required_data, v_flag, i_flag, c_flag, n_flag, e_flag, l_flag, h_flag, o_flag, file_counter, f_flag);
+        finder(file, argc, argv[i], f_flag_lines, &f_cycle_counter, &v_f_counter, num_lines, required_data, v_flag, i_flag, c_flag, n_flag, l_flag, h_flag, o_flag, file_counter, f_flag);
         fclose(file);
     }
     return 0;
@@ -120,7 +121,7 @@ FILE *open_file(const char *filename, char *argv[], int s_flag){
     return file;
 }
 
-void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int *f_cycle_counter, int *v_f_counter, size_t num_lines, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int e_flag, int l_flag, int h_flag, int o_flag, int file_counter, int f_flag){
+void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int *f_cycle_counter, int *v_f_counter, int num_lines, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int l_flag, int h_flag, int o_flag, int file_counter, int f_flag){
     char *buffer = NULL;
     size_t buffer_size = 0;
     int line_number = 0;
@@ -351,7 +352,7 @@ void process_o_flag(char *buffer, char *required_data, int o_flag, int i_flag, i
     }
 }
 
-void process_f_flag(char *buffer, size_t num_lines, char **f_flag_lines, int f_flag, int *line_number, int *counter, int *v_f_counter, int file_counter, int h_flag, const char *filename, int *smth_found, int i_flag, int c_flag, int n_flag, int v_flag, int o_flag) {
+void process_f_flag(char *buffer, int num_lines, char **f_flag_lines, int f_flag, int *line_number, int *counter, int *v_f_counter, int file_counter, int h_flag, const char *filename, int *smth_found, int i_flag, int c_flag, int n_flag, int v_flag, int o_flag) {
     if (f_flag) {
         char *tmp = strdup(buffer);
         if (v_flag && o_flag) {
@@ -550,7 +551,7 @@ char *strcasestr(const char *haystack, const char *needle) {
     return result;
 }
 
-char** get_data_f_flag(char *filename, size_t *num_lines, int s_flag, char *argv[]) {
+char** get_data_f_flag(char *filename, int *num_lines, int s_flag, char *argv[]) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
         if (!s_flag) {
