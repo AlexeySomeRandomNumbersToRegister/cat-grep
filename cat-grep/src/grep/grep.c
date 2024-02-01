@@ -5,8 +5,8 @@
 #include <getopt.h>
 #include <ctype.h>
 
-#define ANSI_COLOR_RED "\033[1;31m"
-#define ANSI_COLOR_RESET "\x1b[0m"
+// #define ANSI_COLOR_RED "\033[1;31m"
+// #define ANSI_COLOR_RESET "\x1b[0m"
 
 void parse_args(int argc, char *argv[], int *e_flag, int *i_flag, int *v_flag, int *c_flag, int *l_flag, int *n_flag, int *h_flag, int *s_flag, int *f_flag, int *o_flag, char **e_arg, char **f_arg);
 FILE *open_file(const char *filename, char *argv[], int s_flag);
@@ -146,11 +146,18 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
             free(tmp);
         }
         if(!c_flag && !l_flag && *f_cycle_counter < (argc - optind - 1)) {
-            if (f_flag && v_flag && file_counter && !h_flag) {
+            if (f_flag && v_flag && file_counter && !h_flag && !n_flag && buffer[0] != '\0') {
                 fprintf(stdout, "%s:", filename);
+            }
+            if (f_flag && v_flag && n_flag && buffer[0] != '\0') {
+                if (file_counter && !h_flag) {
+                    fprintf(stdout, "%s:", filename);
+                }
+                fprintf(stdout, "%d:", line_number);
             }
             fprintf(stdout, "%s", buffer);
         }
+        // Старый вариант печати специально для -f -v
     //     if(f_flag && v_flag && *f_cycle_counter < (argc - optind - 1)) {
     //         if (file_counter && !h_flag) {
     //                 fprintf(stdout, "%s:", filename);
@@ -412,20 +419,29 @@ void process_f_flag(char *buffer, size_t num_lines, char **f_flag_lines, int f_f
             }
         }
         if (v_flag && n_flag && !i_flag) {
-            buffer[0] = '\0';   
+            (*v_f_counter)++;
             for (int i = 0; i < num_lines; i++) {
+                // printf("LINE NUMBER: %ld\n", num_lines);
                 if(strstr(tmp, f_flag_lines[i]) != NULL) {
-                    // printf("v_f_counter: %d\n", *v_f_counter);
-                    (*v_f_counter)++;
-                    if (file_counter && !h_flag) {
-                        sprintf(buffer, "%s:%d:", filename, *line_number);
-                    }
-                    if (!file_counter) {
-                        sprintf(buffer, "%d:", *line_number);
-                    }
-                    strcat(buffer, tmp);
+                    buffer[0] = '\0';
                     (*smth_found) = 1;
+                    // printf("v_f_counter: %d\n", *v_f_counter);
                 }
+                (*line_number) = (*v_f_counter);
+            }
+            // if (*v_f_counter > num_lines) {
+            //     *v_f_counter = 0;
+            // }
+        }
+        if (v_flag && n_flag && i_flag) { 
+            (*v_f_counter)++;
+            for (int i = 0; i < num_lines; i++) {
+                if(strcasestr(tmp, f_flag_lines[i]) != NULL) {
+                    buffer[0] = '\0';
+                    (*smth_found) = 1;
+                    // printf("v_f_counter: %d\n", *v_f_counter);
+                }
+                (*line_number) = (*v_f_counter);
             }
         }
         if (v_flag && !i_flag && !o_flag && !n_flag) {
@@ -582,4 +598,5 @@ char** get_data_f_flag(char *filename, size_t *num_lines, int s_flag, char *argv
 
 // При использовании -о текст должен быть красного цвета
 // strcasestr работает только с английским текстом
-// -n -v -f вместе вообще не работают
+// При использовании -n -v -f флаг -n не обнуляется после начала второго файла
+// -i -v -n -f хрень какая-то
