@@ -170,8 +170,12 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
                 fprintf(stdout, "%s%d%s%s%s", ANSI_COLOR_GREEN, line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
             }
             if (f_flag || v_flag) {
-            fprintf(stdout, "%s", buffer);}
-            if (!f_flag && !v_flag) {
+            fprintf(stdout, "%s", buffer);
+            }
+            if (o_flag) {
+                fprintf(stdout, "%s%s%s", ANSI_COLOR_RED, buffer, ANSI_COLOR_RESET);
+            }
+            if (!f_flag && !v_flag && !o_flag) {
                 while ((next_match = strcasestr(match, required_data)) != NULL) {
                     size_t prefix_len = next_match - match;
 
@@ -181,8 +185,12 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
                     }
 
                     // Выделение найденного текста красным цветом
-                    fprintf(stdout, "%s%s%s", ANSI_COLOR_RED, required_data, ANSI_COLOR_RESET);
-
+                    if (!i_flag) {
+                        fprintf(stdout, "%s%s%s", ANSI_COLOR_RED, required_data, ANSI_COLOR_RESET);
+                    }
+                    if (i_flag) {
+                        fprintf(stdout, "%s%s%s", ANSI_COLOR_RED, found_str, ANSI_COLOR_RESET);
+                    }
                     // Перемещение указателя на следующий символ после найденной подстроки
                     match = next_match + strlen(required_data);
 
@@ -688,3 +696,4 @@ char** get_data_f_flag(char *filename, int *num_lines, int s_flag, char *argv[])
 
 // При использовании -i выводится то, что искалось, а не то, что нашлось
 // При использовании -o, если было найдено несколько вхождений на одной строке, они напишутся только 1 раз
+// 
