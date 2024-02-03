@@ -546,17 +546,17 @@ void process_f_flag(char *buffer, int num_lines, char **f_flag_lines, int f_flag
                         if (file_counter && !h_flag) {
                             if (!n_flag) {
                                 // sprintf(buffer, "%s:", filename);
-                                sprintf(buffer, "%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
+                                sprintf(buffer, "%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
                             }
                             if (n_flag) {
                                 // sprintf(buffer, "%s:%d:", filename, *line_number);
-                                sprintf(buffer, "%s%s%s%s%s%d%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
+                                sprintf(buffer, "%s%s%s%s%s%d%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
                             }
                         }
                         if (!file_counter) {
                             if(n_flag) {
                                 // sprintf(buffer, "%d:", *line_number);
-                                sprintf(buffer, "%s%d%s%s%s", ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
+                                sprintf(buffer, "%s%d%s%s%s", ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
                             }
                         }
                         strcat(buffer, f_flag_lines[i]);
@@ -575,17 +575,17 @@ void process_f_flag(char *buffer, int num_lines, char **f_flag_lines, int f_flag
                         if (file_counter && !h_flag) {
                             if (!n_flag) {
                                 // sprintf(buffer, "%s:", filename);
-                                sprintf(buffer, "%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
+                                sprintf(buffer, "%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
                             }
                             if (n_flag) {
                                 // sprintf(buffer, "%s:%d:", filename, *line_number);
-                                sprintf(buffer, "%s%s%s%s%s%d%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
+                                sprintf(buffer, "%s%s%s%s%s%d%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
                             }
                         }
                         if (!file_counter) {
                             if(n_flag) {
                                 // sprintf(buffer, "%d:", *line_number);
-                                sprintf(buffer, "%s%d%s%s%s", ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
+                                sprintf(buffer, "%s%d%s%s%s", ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
                             }
                         }
                         strncat(buffer, found_str, strlen(f_flag_lines[i]));
@@ -688,4 +688,3 @@ char** get_data_f_flag(char *filename, int *num_lines, int s_flag, char *argv[])
 // При использовании -o, если было найдено несколько вхождений на одной строке, они напишутся только 1 раз
 // При поиске буквы, которая есть в названии файла через -i она тоже становится красной
 // Нет регулярок
-// Нет цвета : ./my_grep -n -o -f shablon.txt result.txt
