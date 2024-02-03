@@ -46,10 +46,12 @@ int main(int argc, char *argv[]){
         f_flag_lines = get_data_f_flag(f_arg, &num_lines, s_flag, argv); // Массив строк, к которому можно обращаться по индексу [0], [1] ...
             for (int j = optind + 1; j < argc; j++) {
                 FILE *file = open_file(argv[j], argv, s_flag);
+                if (file != NULL) {
                     if (argc - optind > 1) {
                         file_counter = 1;
                     }
                 finder(file, argc, argv[j], f_flag_lines, &f_cycle_counter, &v_f_counter, num_lines, required_data, v_flag, i_flag, c_flag, n_flag, l_flag, h_flag, o_flag, file_counter, f_flag);
+                }
             }
         optind--; // Уменьшаем optind, чтобы пропустить -f и перейти к следующему аргументу
     }
@@ -58,8 +60,10 @@ int main(int argc, char *argv[]){
     }
     for (int i = optind + 1; i < argc; i++){
         FILE *file = open_file(argv[i], argv, s_flag);
-        finder(file, argc, argv[i], f_flag_lines, &f_cycle_counter, &v_f_counter, num_lines, required_data, v_flag, i_flag, c_flag, n_flag, l_flag, h_flag, o_flag, file_counter, f_flag);
-        fclose(file);
+        if (file != NULL) {
+            finder(file, argc, argv[i], f_flag_lines, &f_cycle_counter, &v_f_counter, num_lines, required_data, v_flag, i_flag, c_flag, n_flag, l_flag, h_flag, o_flag, file_counter, f_flag);
+            fclose(file);
+        }
     }
     return 0;
 }
@@ -117,7 +121,8 @@ FILE *open_file(const char *filename, char *argv[], int s_flag){
         if (!s_flag) {
             fprintf(stderr, "%s: %s: No such file or directory\n", argv[0], filename);
         }
-        exit(EXIT_FAILURE);
+        // exit(EXIT_FAILURE);
+        return NULL;
     }
     return file;
 }
@@ -658,21 +663,9 @@ char** get_data_f_flag(char *filename, int *num_lines, int s_flag, char *argv[])
     return lines;
 }
 
-// Нет выделения вхождений красным цветом в -f
-// Нет повторного вхождения в строку в -f
 // Переставить флаги в функциях вместе
-// Попробовать сократить функцию process_n_flag() и process_f_fleg() до 50 строк, чтобы соответствовать принципам структурного программирования
 
-// Пофиксить не проверку последнего файла:
-// user@DESKTOP-FPE95AJ:/mnt/c/Users/q/Desktop/School21/SimpleBushUtils (Cat Grep)/C3_SimpleBashUtils-1/src/grep$ ./my_grep -s exit a.txt b.txt o.txt c.txt
-// b.txt:  -V, --version             display version information and exit
-// b.txt:      --help                display this help text and exit
-// b.txt:if any error occurs and -q is not given, the exit status is 2.
-// user@DESKTOP-FPE95AJ:/mnt/c/Users/q/Desktop/School21/SimpleBushUtils (Cat Grep)/C3_SimpleBashUtils-1/src/grep$ grep -s exit a.txt b.txt o.txt c.txt
-// b.txt:  -V, --version             display version information and exit
-// b.txt:      --help                display this help text and exit
-// b.txt:if any error occurs and -q is not given, the exit status is 2.
-// c.txt:exit gdvffg
+// Попробовать сократить функцию process_n_flag() и process_f_fleg() до 50 строк, чтобы соответствовать принципам структурного программирования
 
 // strcasestr работает только с английским текстом
 
@@ -686,5 +679,7 @@ char** get_data_f_flag(char *filename, int *num_lines, int s_flag, char *argv[])
 // Без -n работает, можно прописать
 
 // При использовании -o, если было найдено несколько вхождений на одной строке, они напишутся только 1 раз
+
 // При поиске буквы, которая есть в названии файла через -i она тоже становится красной
+
 // Нет регулярок
