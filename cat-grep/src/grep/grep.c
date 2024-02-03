@@ -156,6 +156,9 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
             }
             free(tmp);
         }
+        
+        // СДЕЛАТЬ ОТДЕЛЬНУЮ ФУНКЦИЮ ПРИНТ_СТДАУТ
+
         if(!c_flag && !l_flag && *f_cycle_counter < (argc - optind - 1)) {
             if (f_flag && v_flag && file_counter && !h_flag && !n_flag && buffer[0] != '\0') {
                 // fprintf(stdout, "%s:", filename);
@@ -169,9 +172,34 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
                 // fprintf(stdout, "%d:", line_number);
                 fprintf(stdout, "%s%d%s%s%s", ANSI_COLOR_GREEN, line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
             }
-            if (f_flag || v_flag) {
-            fprintf(stdout, "%s", buffer);
+            if (v_flag) {
+                fprintf(stdout, "%s", buffer);
             }
+
+            if (f_flag && !o_flag) {
+                for (int i = 0; i < num_lines; i++) {
+                    while ((next_match = strcasestr(match, f_flag_lines[i])) != NULL) {
+                        size_t prefix_len = next_match - match;
+                        if (prefix_len > 0) {
+                            fwrite(match, 1, prefix_len, stdout);
+                        }
+                        if (!i_flag) {
+                            fprintf(stdout, "%s%s%s", ANSI_COLOR_RED, f_flag_lines[i], ANSI_COLOR_RESET);
+                        }
+                        if (i_flag) {
+                            fprintf(stdout, "%s%.*s%s", ANSI_COLOR_RED, (int)strlen(f_flag_lines[i]), next_match, ANSI_COLOR_RESET);
+                        }
+                        // Перемещение указателя на следующий символ после найденной подстроки
+                        match = next_match + strlen(f_flag_lines[i]);
+
+                        match_found = 1;
+                        }
+                    }
+                    if (match_found && *match != '\0') {
+                        fputs(match, stdout);
+                    }
+                }
+
             if (o_flag) {
                 fprintf(stdout, "%s%s%s", ANSI_COLOR_RED, buffer, ANSI_COLOR_RESET);
             }
@@ -183,13 +211,11 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
                     if (prefix_len > 0) {
                         fwrite(match, 1, prefix_len, stdout);
                     }
-
-                    // Выделение найденного текста красным цветом
                     if (!i_flag) {
                         fprintf(stdout, "%s%s%s", ANSI_COLOR_RED, required_data, ANSI_COLOR_RESET);
                     }
                     if (i_flag) {
-                        fprintf(stdout, "%s%s%s", ANSI_COLOR_RED, found_str, ANSI_COLOR_RESET);
+                        fprintf(stdout, "%s%.*s%s", ANSI_COLOR_RED, (int)strlen(required_data), next_match, ANSI_COLOR_RESET);
                     }
                     // Перемещение указателя на следующий символ после найденной подстроки
                     match = next_match + strlen(required_data);
@@ -203,13 +229,6 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
                 }
             }
         }
-        // Старый вариант печати специально для -f -v
-    //     if(f_flag && v_flag && *f_cycle_counter < (argc - optind - 1)) {
-    //         if (file_counter && !h_flag) {
-    //                 fprintf(stdout, "%s:", filename);
-    //             }
-    //         fprintf(stdout, "%s", buffer);
-    //     }
     counter++;
     }
         if (c_flag && !l_flag && *f_cycle_counter < (argc - optind - 1)) {
@@ -266,6 +285,7 @@ void process_i_flag(char *buffer, char *required_data, int i_flag, int *line_num
                     sprintf(buffer, "%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
                 }
             strcat(buffer, tmp);
+            // printf("BUFFER: %s\n", buffer);
             (*smth_found) = 1;
             if (!n_flag) {
                 (*line_number)++;
@@ -360,60 +380,32 @@ void process_o_flag(char *buffer, char *required_data, int o_flag, int i_flag, i
     if (o_flag && !f_flag && !v_flag) {
         char *tmp = strdup(buffer);
         buffer[0] = '\0';
-        if (!i_flag) {
-            if (strstr(tmp, required_data) != NULL) {
-                if (file_counter && !h_flag) {
-                    if (!n_flag) {
-                        // sprintf(buffer, "%s:", filename);
-                        sprintf(buffer, "%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
-                    }
-                    if (n_flag) {
-                        // sprintf(buffer, "%s:%d:", filename, *line_number);
-                        sprintf(buffer, "%s%s%s%s%s%d%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
-                    }
-                }
-                if (!file_counter) {
-                    if(n_flag) {
-                        // sprintf(buffer, "%d:", *line_number);
-                    sprintf(buffer, "%s%d%s%s%s", ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
-                    }
-                }
-                strcat(buffer, required_data);
-                strcat(buffer, "\n");
-                (*smth_found) = 1;
+        char *found_str = tmp;
+
+        while ((found_str = (i_flag ? strcasestr(found_str, required_data) : strstr(found_str, required_data))) != NULL) {
+            if (file_counter && !h_flag) {
                 if (!n_flag) {
-                    (*line_number)++;
+                    sprintf(buffer, "%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
+                }
+                if (n_flag) {
+                    sprintf(buffer, "%s%s%s%s%s%d%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
                 }
             }
-        }
-        if(i_flag) {
-            char *found_str = strcasestr(tmp, required_data);
-            if (found_str != NULL) {
-                if (file_counter && !h_flag) {
-                    if (!n_flag) {
-                        // sprintf(buffer, "%s:", filename);
-                        sprintf(buffer, "%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
-                    }
-                    if (n_flag) {
-                        // sprintf(buffer, "%s:%d:", filename, *line_number);
-                        sprintf(buffer, "%s%s%s%s%s%d%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
-                    }
-                }
-                if (!file_counter) {
-                    if(n_flag) {
-                        // sprintf(buffer, "%d:", *line_number);
-                        sprintf(buffer, "%s%d%s%s%s", ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
-                    }
-                }
-                strncat(buffer, found_str, strlen(required_data));
-                strcat(buffer, "\n");
-                (*smth_found) = 1;
-                if (!n_flag) {
-                    (*line_number)++;
+            if (!file_counter) {
+                if(n_flag) {
+                    sprintf(buffer, "%s%d%s%s%s", ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
                 }
             }
+            strncat(buffer, found_str, strlen(required_data));
+            strcat(buffer, "\n");
+            (*smth_found) = 1;
+            if (!n_flag) {
+                (*line_number)++;
+            }
+            found_str += strlen(required_data);
         }
-        free(tmp); 
+
+        free(tmp);
     }
 }
 
@@ -682,7 +674,6 @@ char** get_data_f_flag(char *filename, int *num_lines, int s_flag, char *argv[])
 // b.txt:if any error occurs and -q is not given, the exit status is 2.
 // c.txt:exit gdvffg
 
-// При использовании -о текст должен быть красного цвета
 // strcasestr работает только с английским текстом
 
 // Надо создать удобные файлы для тестирования, чтобы ничего не ломалось
@@ -694,6 +685,7 @@ char** get_data_f_flag(char *filename, int *num_lines, int s_flag, char *argv[])
 // Segmentation fault
 // Без -n работает, можно прописать
 
-// При использовании -i выводится то, что искалось, а не то, что нашлось
 // При использовании -o, если было найдено несколько вхождений на одной строке, они напишутся только 1 раз
-// 
+// При поиске буквы, которая есть в названии файла через -i она тоже становится красной
+// Нет регулярок
+// Нет цвета : ./my_grep -n -o -f shablon.txt result.txt
