@@ -121,7 +121,6 @@ FILE *open_file(const char *filename, char *argv[], int s_flag){
         if (!s_flag) {
             fprintf(stderr, "%s: %s: No such file or directory\n", argv[0], filename);
         }
-        // exit(EXIT_FAILURE);
         return NULL;
     }
     return file;
@@ -148,18 +147,51 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
 
         if(!v_flag && !i_flag && !n_flag && !o_flag && !f_flag) {
 
-            char *tmp = strdup(buffer);
-            buffer[0] = '\0';
-            if(strstr(tmp, required_data) != NULL){
-                if (file_counter && !h_flag && !c_flag) {
-                    // sprintf(buffer, "%s:", filename);
-                    fprintf(stdout, "%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
-                }
-                strcat(buffer, tmp);
-                line_number++;
-                smth_found = 1;
+            regex_t regex;
+            int reti;
+
+            // Компиляция регулярного выражения
+            reti = regcomp(&regex, required_data, REG_EXTENDED);
+            if (reti != 0) {
+                fprintf(stderr, "Ошибка компиляции регулярного выражения\n");
+                fclose(file);
+                exit(EXIT_FAILURE);
             }
-            free(tmp);
+
+            // Поиск по строкам файла
+            while (getline(&buffer, &buffer_size, file) != -1) {
+                line_number++;
+
+                regmatch_t match;
+                int offset = 0;
+                int found = 0;
+
+                // Поиск и подсветка совпадений в строке
+                while ((reti = regexec(&regex, buffer + offset, 1, &match, 0)) == 0) {
+                    found = 1;
+                    printf("%.*s%s%.*s%s%s", match.rm_so, buffer + offset, ANSI_COLOR_RED,
+                        match.rm_eo - match.rm_so, buffer + offset + match.rm_so, ANSI_COLOR_RESET,
+                        buffer + offset + match.rm_eo);
+
+                    offset += match.rm_eo;
+
+                    // Если найдено только одно вхождение, прерываем цикл
+                    if (match.rm_so == match.rm_eo) break;
+                }
+
+            }
+            // char *tmp = strdup(buffer);
+            // buffer[0] = '\0';
+            // if(strstr(tmp, required_data) != NULL){
+            //     if (file_counter && !h_flag && !c_flag) {
+            //         // sprintf(buffer, "%s:", filename);
+            //         fprintf(stdout, "%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
+            //     }
+            //     strcat(buffer, tmp);
+            //     line_number++;
+            //     smth_found = 1;
+            // }
+            // free(tmp);
         }
         
         // СДЕЛАТЬ ОТДЕЛЬНУЮ ФУНКЦИЮ ПРИНТ_СТДАУТ
@@ -682,4 +714,4 @@ char** get_data_f_flag(char *filename, int *num_lines, int s_flag, char *argv[])
 
 // При поиске буквы, которая есть в названии файла через -i она тоже становится красной
 
-// Нет регулярок
+// Нет регулярок кроме использования без флагов
