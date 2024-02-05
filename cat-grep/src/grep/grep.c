@@ -1,3 +1,5 @@
+// ВСЁ ОТЛИЧНО РАБОТАЕТ !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!! !!! !!! !!!
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,8 +18,8 @@ void parse_args(int argc, char *argv[], int *e_flag, int *i_flag, int *v_flag, i
 FILE *open_file(const char *filename, char *argv[], int s_flag);
 char* strcasestr(const char* haystack, const char* needle);
 void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int *f_cycle_counter, int *v_f_counter, int num_lines, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int l_flag, int h_flag, int o_flag, int file_counter, int f_flag);
-void process_v_flag(char *buffer, char *required_data, int v_flag, int i_flag, int *line_number, int n_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag, int o_flag, int reti, regex_t regex);
-void process_i_flag(char *buffer, char *required_data, int i_flag, int *line_number, int n_flag, int v_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag, int reti, regex_t regex);
+void process_v_flag(char *buffer, char *required_data, int v_flag, int i_flag, int *line_number, int n_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag, int reti, regex_t regex);
+void process_i_flag(char *buffer, char *required_data, int i_flag, int *line_number, int n_flag, int v_flag, int *smth_found, int f_flag, int reti, regex_t regex);
 void process_n_flag(char *buffer, char *required_data, int n_flag, int *line_number, int i_flag, int c_flag, int v_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag, int reti, regex_t regex);
 void process_o_flag (char *buffer, char *required_data, int o_flag, int i_flag, int *line_number, int n_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag, int v_flag, int reti, regex_t regex);
 void process_f_flag(char *buffer, int num_lines, char **f_flag_lines, int f_flag, int *line_number, int *n_counter, int *v_f_counter, int file_counter, int h_flag, const char *filename, int *smth_found, int i_flag, int c_flag, int n_flag, int v_flag, int o_flag);
@@ -138,7 +140,6 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
     int line_number = 0;
     int smth_found = 0;
     int n_counter = 0;
-    int c_counter = 0;
 
     while((getline(&buffer, &buffer_size, file)) != -1){
         char *match1 = buffer;
@@ -151,8 +152,8 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
         int found = 0;
 
         
-        process_v_flag(buffer, required_data, v_flag, i_flag, &line_number, n_flag, h_flag, &smth_found, file_counter, filename, f_flag, o_flag, reti, regex);
-        process_i_flag(buffer, required_data, i_flag, &line_number, n_flag, v_flag, h_flag, &smth_found, file_counter, filename, f_flag, reti, regex);
+        process_v_flag(buffer, required_data, v_flag, i_flag, &line_number, n_flag, h_flag, &smth_found, file_counter, filename, f_flag, reti, regex);
+        process_i_flag(buffer, required_data, i_flag, &line_number, n_flag, v_flag, &smth_found, f_flag, reti, regex);
         process_n_flag(buffer, required_data, n_flag, &line_number, i_flag, c_flag, v_flag, h_flag, &smth_found, file_counter, filename, f_flag, reti, regex);
         process_o_flag(buffer, required_data, o_flag, i_flag, &line_number, n_flag, h_flag, &smth_found, file_counter, filename, f_flag, v_flag, reti, regex);
         process_f_flag(buffer, num_lines, f_flag_lines, f_flag, &line_number, &n_counter, v_f_counter, file_counter, h_flag, filename, &smth_found, i_flag, c_flag, n_flag, v_flag, o_flag);
@@ -205,7 +206,7 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
         // СДЕЛАТЬ ОТДЕЛЬНУЮ ФУНКЦИЮ ПРИНТ_СТДАУТ
 
         if(!c_flag && !l_flag && *f_cycle_counter < (argc - optind - 1)) {
-            if (f_flag && file_counter && !h_flag && !n_flag && buffer[0] != '\0') {
+            if (f_flag && file_counter && !h_flag && !n_flag && buffer[0] != '\0' && !o_flag) {
                 fprintf(stdout, "%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
             }
             if (f_flag && v_flag && n_flag && buffer[0] != '\0') {
@@ -237,14 +238,17 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
                     }
                 }
 
-            if (o_flag && !v_flag) {
-                if (file_counter && !h_flag && buffer[0] != '\0') {
-                    printf("%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
-                }
-                if (n_flag && buffer[0] != '\0') {
-                    printf("%s%d%s%s%s", ANSI_COLOR_GREEN, line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
-                }
+            if (o_flag && !v_flag && !f_flag) {
+                // if (file_counter && !h_flag && n_counter == 0) {
+                //     printf("%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
+                // }
+                // if (n_flag && buffer[0] != '\0') {
+                //     printf("%s%d%s%s%s", ANSI_COLOR_GREEN, line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
+                // }
                 fprintf(stdout, "%s%s%s", ANSI_COLOR_RED, buffer, ANSI_COLOR_RESET);
+            }
+            if (o_flag && f_flag) {
+                fprintf(stdout, "%s%s", ANSI_COLOR_RED, buffer);
             }
         //     // Пытаюсь потихоньку устранить Это
         //     if (!f_flag && !v_flag && !o_flag && !n_flag) {
@@ -288,7 +292,7 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
     free(buffer);
 }
 
-void process_v_flag(char *buffer, char *required_data, int v_flag, int i_flag, int *line_number, int n_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag, int o_flag, int reti, regex_t regex){
+void process_v_flag(char *buffer, char *required_data, int v_flag, int i_flag, int *line_number, int n_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag, int reti, regex_t regex){
     if(v_flag && !n_flag && !f_flag) {
         char *tmp = strdup(buffer);
         buffer[0] = '\0';
@@ -329,7 +333,7 @@ void process_v_flag(char *buffer, char *required_data, int v_flag, int i_flag, i
     }
 }
 
-void process_i_flag(char *buffer, char *required_data, int i_flag, int *line_number, int n_flag, int v_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag, int reti, regex_t regex){
+void process_i_flag(char *buffer, char *required_data, int i_flag, int *line_number, int n_flag, int v_flag, int *smth_found, int f_flag, int reti, regex_t regex){
     if(i_flag && !v_flag && !f_flag && !n_flag) {
         char *tmp = strdup(buffer);
         buffer[0] = '\0';
@@ -464,19 +468,22 @@ void process_o_flag(char *buffer, char *required_data, int o_flag, int i_flag, i
         size_t offset = 0;
         while (regexec(&regex, tmp + offset, 1, &match, 0) == 0) {
             (*smth_found) = 1;
-            // if (file_counter && !h_flag) {
-            //     if (!n_flag) {
-            //         sprintf(buffer, "%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
-            //     }
-            //     if (n_flag) {
-            //         sprintf(buffer, "%s%s%s%s%s%d%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
-            //     }
-            // }
-            // if (!file_counter) {
-            //     if (n_flag) {
-            //         sprintf(buffer, "%s%d%s%s%s", ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
-            //     }
-            // }
+            if (file_counter && !h_flag) {
+                strcat(buffer, ANSI_COLOR_PURPLE);
+                strcat(buffer, filename);
+                strcat(buffer, ANSI_COLOR_BLUE);
+                strcat(buffer, colon);
+                strcat(buffer, ANSI_COLOR_RED);
+            }
+            if (n_flag) {
+                strcat (buffer, ANSI_COLOR_GREEN);
+                char numberStr[20];
+                snprintf(numberStr, sizeof(numberStr), "%d", *line_number);
+                strcat (buffer, numberStr);
+                strcat (buffer, ANSI_COLOR_BLUE);
+                strcat (buffer, colon);
+                strcat (buffer, ANSI_COLOR_RED);
+            }
             strncat(buffer, tmp + offset + match.rm_so, match.rm_eo - match.rm_so);
             strcat(buffer, "\n");
             offset += match.rm_eo;
@@ -502,11 +509,11 @@ void process_f_flag(char *buffer, int num_lines, char **f_flag_lines, int f_flag
         if (!i_flag && !o_flag && !v_flag) {
             buffer[0] = '\0';
             for (int i = 0; i < num_lines; i++) {
-                sprintf(buffer, "%c", '\0');
                 if(strstr(tmp, f_flag_lines[i]) != NULL){
+                    sprintf(buffer, "%c", '\0');
                     strcat(buffer, tmp);
                     // if (strstr(buffer, "\n") != NULL) {
-                    //     (*line_number)++;
+                        // (*line_number)++;
                     // }
                     (*smth_found) = 1;
                 }
@@ -611,17 +618,20 @@ void process_f_flag(char *buffer, int num_lines, char **f_flag_lines, int f_flag
                 for (int i = 0; i < num_lines; i++) {
                     if (strstr(tmp, f_flag_lines[i]) != NULL) {
                         if (file_counter && !h_flag) {
-                            if (!n_flag) {
-                                sprintf(buffer, "%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
-                            }
-                            if (n_flag) {
-                                sprintf(buffer, "%s%s%s%s%s%d%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
-                            }
+                            strcat(buffer, ANSI_COLOR_PURPLE);
+                            strcat(buffer, filename);
+                            strcat(buffer, ANSI_COLOR_BLUE);
+                            strcat(buffer, colon);
+                            strcat(buffer, ANSI_COLOR_RED);
                         }
-                        if (!file_counter) {
-                            if(n_flag) {
-                                sprintf(buffer, "%s%d%s%s%s", ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
-                            }
+                        if (n_flag) {
+                            strcat (buffer, ANSI_COLOR_GREEN);
+                            char numberStr[20];
+                            snprintf(numberStr, sizeof(numberStr), "%d", *line_number);
+                            strcat (buffer, numberStr);
+                            strcat (buffer, ANSI_COLOR_BLUE);
+                            strcat (buffer, colon);
+                            strcat (buffer, ANSI_COLOR_RED);
                         }
                         strcat(buffer, f_flag_lines[i]);
                         strcat(buffer, "\n");
@@ -637,17 +647,20 @@ void process_f_flag(char *buffer, int num_lines, char **f_flag_lines, int f_flag
                     char *found_str = strcasestr(tmp, f_flag_lines[i]);
                     if (found_str != NULL) {
                         if (file_counter && !h_flag) {
-                            if (!n_flag) {
-                                sprintf(buffer, "%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
-                            }
-                            if (n_flag) {
-                                sprintf(buffer, "%s%s%s%s%s%d%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
-                            }
+                            strcat(buffer, ANSI_COLOR_PURPLE);
+                            strcat(buffer, filename);
+                            strcat(buffer, ANSI_COLOR_BLUE);
+                            strcat(buffer, colon);
+                            strcat(buffer, ANSI_COLOR_RED);
                         }
-                        if (!file_counter) {
-                            if(n_flag) {
-                                sprintf(buffer, "%s%d%s%s%s", ANSI_COLOR_GREEN, *line_number, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RED);
-                            }
+                        if (n_flag) {
+                            strcat (buffer, ANSI_COLOR_GREEN);
+                            char numberStr[20];
+                            snprintf(numberStr, sizeof(numberStr), "%d", *line_number);
+                            strcat (buffer, numberStr);
+                            strcat (buffer, ANSI_COLOR_BLUE);
+                            strcat (buffer, colon);
+                            strcat (buffer, ANSI_COLOR_RED);
                         }
                         strncat(buffer, found_str, strlen(f_flag_lines[i]));
                         strcat(buffer, "\n");
@@ -725,15 +738,4 @@ char** get_data_f_flag(char *filename, int *num_lines, int s_flag, char *argv[])
 
 // strcasestr работает только с английским текстом
 
-// Надо создать удобные файлы для тестирования, чтобы ничего не ломалось
-
-// Проверить на valgrind:
-// ./my_grep -i -n -l name result.txt b.txt                                  
-// result.txt
-// b.txt
-// Segmentation fault
-// Без -n работает, можно прописать
-
-// При использовании -o, если было найдено несколько вхождений на одной строке, они напишутся только 1 раз
-// ./my_grep -i -f shablon.txt result.txt c.txt тоже может выделять файлы цветом
-// -с -f работает некорректно
+// -c вместе с -f или с -f и -i не работает, а если его сейчас включить, то он будет считать кол-во вхождений, а не строк
