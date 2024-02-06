@@ -18,8 +18,8 @@ void parse_args(int argc, char *argv[], int *e_flag, int *i_flag, int *v_flag, i
 FILE *open_file(const char *filename, char *argv[], int s_flag);
 char* strcasestr(const char* haystack, const char* needle);
 void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int *f_cycle_counter, int *v_f_counter, int num_lines, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int l_flag, int h_flag, int o_flag, int file_counter, int f_flag);
-void print_stdout(char *buffer, int line_number, int smth_found, int n_counter, char *next_match, char *match1, int match_found, int argc, const char *filename, char** f_flag_lines, int *f_cycle_counter, int *v_f_counter, int num_lines, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int l_flag, int h_flag, int o_flag, int file_counter, int f_flag);
-void print_c_l(char *buffer, int line_number, int smth_found, int argc, const char *filename, char** f_flag_lines, int *f_cycle_counter, int *v_f_counter, int num_lines, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int l_flag, int h_flag, int o_flag, int file_counter, int f_flag);
+void print_stdout(char *buffer, int line_number, int n_counter, char *next_match, char *match1, int match_found, int argc, const char *filename, char** f_flag_lines, int *f_cycle_counter, int num_lines, int v_flag, int i_flag, int c_flag, int n_flag, int l_flag, int h_flag, int o_flag, int file_counter, int f_flag);
+void print_c_l(char *buffer, int line_number, int smth_found, int argc, const char *filename, int *f_cycle_counter, int c_flag, int l_flag, int h_flag, int file_counter);
 void process_v_flag(char *buffer, char *required_data, int v_flag, int i_flag, int *line_number, int n_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag, int reti, regex_t regex);
 void process_i_flag(char *buffer, char *required_data, int i_flag, int *line_number, int n_flag, int v_flag, int *smth_found, int f_flag, int reti, regex_t regex, int c_flag);
 void process_n_flag(char *buffer, char *required_data, int n_flag, int *line_number, int i_flag, int c_flag, int v_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag, int reti, regex_t regex);
@@ -141,7 +141,8 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
     size_t buffer_size = 0;
     int line_number = 0, smth_found = 0, n_counter = 0, reti;
     while((getline(&buffer, &buffer_size, file)) != -1){
-        char *match1 = buffer, *next_match;
+        char *match1 = buffer;
+        char *next_match = NULL;
         int match_found = 0, offset = 0, found = 0;
         regex_t regex;
         regmatch_t match;
@@ -185,12 +186,12 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
             }
             regfree(&regex);
         }
-        print_stdout(buffer, line_number, smth_found, n_counter, next_match, match1, match_found, argc, filename, f_flag_lines, f_cycle_counter, v_f_counter, num_lines, required_data, v_flag, i_flag, c_flag, n_flag, l_flag, h_flag, o_flag, file_counter, f_flag);
+        print_stdout(buffer, line_number, n_counter, next_match, match1, match_found, argc, filename, f_flag_lines, f_cycle_counter, num_lines, v_flag, i_flag, c_flag, n_flag, l_flag, h_flag, o_flag, file_counter, f_flag);
     }
-    print_c_l(buffer, line_number, smth_found, argc, filename, f_flag_lines, f_cycle_counter, v_f_counter, num_lines, required_data, v_flag, i_flag, c_flag, n_flag, l_flag, h_flag, o_flag, file_counter, f_flag);
+print_c_l(buffer, line_number, smth_found, argc, filename, f_cycle_counter, c_flag, l_flag, h_flag, file_counter);
 }
 
-void print_stdout(char *buffer, int line_number, int smth_found, int n_counter, char *next_match, char *match1, int match_found, int argc, const char *filename, char** f_flag_lines, int *f_cycle_counter, int *v_f_counter, int num_lines, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int l_flag, int h_flag, int o_flag, int file_counter, int f_flag) {
+void print_stdout(char *buffer, int line_number, int n_counter, char *next_match, char *match1, int match_found, int argc, const char *filename, char** f_flag_lines, int *f_cycle_counter, int num_lines, int v_flag, int i_flag, int c_flag, int n_flag, int l_flag, int h_flag, int o_flag, int file_counter, int f_flag) {
         if (!c_flag && !l_flag && *f_cycle_counter < (argc - optind - 1)) {
             if (f_flag && buffer[0] != '\0' && !o_flag) {
                 if (file_counter && !h_flag) {
@@ -242,7 +243,7 @@ void print_stdout(char *buffer, int line_number, int smth_found, int n_counter, 
     n_counter++;
 }
 
-void print_c_l(char *buffer, int line_number, int smth_found, int argc, const char *filename, char** f_flag_lines, int *f_cycle_counter, int *v_f_counter, int num_lines, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int l_flag, int h_flag, int o_flag, int file_counter, int f_flag) {
+void print_c_l(char *buffer, int line_number, int smth_found, int argc, const char *filename, int *f_cycle_counter, int c_flag, int l_flag, int h_flag, int file_counter) {
         if (c_flag && !l_flag && *f_cycle_counter < (argc - optind - 1)) {
             if (file_counter && !h_flag) {
                 fprintf(stdout, "%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
@@ -673,5 +674,3 @@ char** get_data_f_flag(char *filename, int *num_lines, int s_flag, char *argv[])
 // strcasestr работает только с английским текстом
 
 // -c -f -v не будет работать как надо
-
-// много лишнего в новых функциях
