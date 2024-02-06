@@ -19,7 +19,7 @@ FILE *open_file(const char *filename, char *argv[], int s_flag);
 char* strcasestr(const char* haystack, const char* needle);
 void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int *f_cycle_counter, int *v_f_counter, int num_lines, char *required_data, int v_flag, int i_flag, int c_flag, int n_flag, int l_flag, int h_flag, int o_flag, int file_counter, int f_flag);
 void process_v_flag(char *buffer, char *required_data, int v_flag, int i_flag, int *line_number, int n_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag, int reti, regex_t regex);
-void process_i_flag(char *buffer, char *required_data, int i_flag, int *line_number, int n_flag, int v_flag, int *smth_found, int f_flag, int reti, regex_t regex);
+void process_i_flag(char *buffer, char *required_data, int i_flag, int *line_number, int n_flag, int v_flag, int *smth_found, int f_flag, int reti, regex_t regex, int c_flag);
 void process_n_flag(char *buffer, char *required_data, int n_flag, int *line_number, int i_flag, int c_flag, int v_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag, int reti, regex_t regex);
 void process_o_flag (char *buffer, char *required_data, int o_flag, int i_flag, int *line_number, int n_flag, int h_flag, int *smth_found, int file_counter, const char *filename, int f_flag, int v_flag, int reti, regex_t regex);
 void process_f_flag(char *buffer, int num_lines, char **f_flag_lines, int f_flag, int *line_number, int *n_counter, int *v_f_counter, int file_counter, int h_flag, const char *filename, int *smth_found, int i_flag, int c_flag, int n_flag, int v_flag, int o_flag);
@@ -153,7 +153,7 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
 
         
         process_v_flag(buffer, required_data, v_flag, i_flag, &line_number, n_flag, h_flag, &smth_found, file_counter, filename, f_flag, reti, regex);
-        process_i_flag(buffer, required_data, i_flag, &line_number, n_flag, v_flag, &smth_found, f_flag, reti, regex);
+        process_i_flag(buffer, required_data, i_flag, &line_number, n_flag, v_flag, &smth_found, f_flag, reti, regex, c_flag);
         process_n_flag(buffer, required_data, n_flag, &line_number, i_flag, c_flag, v_flag, h_flag, &smth_found, file_counter, filename, f_flag, reti, regex);
         process_o_flag(buffer, required_data, o_flag, i_flag, &line_number, n_flag, h_flag, &smth_found, file_counter, filename, f_flag, v_flag, reti, regex);
         process_f_flag(buffer, num_lines, f_flag_lines, f_flag, &line_number, &n_counter, v_f_counter, file_counter, h_flag, filename, &smth_found, i_flag, c_flag, n_flag, v_flag, o_flag);
@@ -173,7 +173,9 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
             }
 
             if ((reti = regexec(&regex, buffer + offset, 1, &match, 0)) == 0) {
-                line_number++;
+                if (!n_flag) {
+                    line_number++;
+                }
                 smth_found = 1;
                 if (file_counter && !h_flag && !c_flag && !l_flag) {
                     fprintf(stdout, "%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
@@ -192,7 +194,7 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
 
                 // Если найдено только одно вхождение, прерываем цикл
                 if (match.rm_so == match.rm_eo) {
-                    line_number++;
+                    // line_number++;
                     break;
                 }
             }
@@ -277,12 +279,30 @@ void finder(FILE *file, int argc, const char *filename, char** f_flag_lines, int
         //         }
         //     }
         }
+
+        // Для -f и -c 
+        if (f_flag && c_flag && !l_flag && *f_cycle_counter < (argc - optind - 1)) {
+            for (int i = 0; i < num_lines; i++) {
+                while ((next_match = (i_flag ? strcasestr(match1, f_flag_lines[i]) : strstr(match1, f_flag_lines[i]))) != NULL) {
+                    match1 = next_match + strlen(f_flag_lines[i]);
+                    match_found = 1;
+                }
+            }
+                if (match_found && *match1 != '\0') {
+                    line_number++;
+                }
+        }
+
+
     n_counter++;
     }
         if (c_flag && !l_flag && *f_cycle_counter < (argc - optind - 1)) {
+            if (n_flag) {
+            }
             if (file_counter && !h_flag) {
                 fprintf(stdout, "%s%s%s%s%s", ANSI_COLOR_PURPLE, filename, ANSI_COLOR_BLUE, colon, ANSI_COLOR_RESET);
             }
+
             fprintf(stdout, "%d\n", line_number);
         }
         if (l_flag && smth_found && *f_cycle_counter < (argc - optind - 1)){
@@ -309,7 +329,7 @@ void process_v_flag(char *buffer, char *required_data, int v_flag, int i_flag, i
                 }
                 strcat(buffer, tmp);
                 (*smth_found) = 1;
-                    (*line_number)++;
+                (*line_number)++;
             }
         }
         if(i_flag) {
@@ -325,7 +345,7 @@ void process_v_flag(char *buffer, char *required_data, int v_flag, int i_flag, i
                 }
                 strcat(buffer, tmp);
                 (*smth_found) = 1;
-                    (*line_number)++;
+                (*line_number)++;
             }
         }
         free(tmp);
@@ -333,7 +353,7 @@ void process_v_flag(char *buffer, char *required_data, int v_flag, int i_flag, i
     }
 }
 
-void process_i_flag(char *buffer, char *required_data, int i_flag, int *line_number, int n_flag, int v_flag, int *smth_found, int f_flag, int reti, regex_t regex){
+void process_i_flag(char *buffer, char *required_data, int i_flag, int *line_number, int n_flag, int v_flag, int *smth_found, int f_flag, int reti, regex_t regex, int c_flag){
     if(i_flag && !v_flag && !f_flag && !n_flag) {
         char *tmp = strdup(buffer);
         buffer[0] = '\0';
@@ -346,7 +366,7 @@ void process_i_flag(char *buffer, char *required_data, int i_flag, int *line_num
         if (reti == 0) {
             strcat(buffer, tmp);
             (*smth_found) = 1;
-            if(!n_flag) {
+            if(!n_flag && !c_flag) {
                 (*line_number)++;
             }
         }
@@ -512,9 +532,6 @@ void process_f_flag(char *buffer, int num_lines, char **f_flag_lines, int f_flag
                 if(strstr(tmp, f_flag_lines[i]) != NULL){
                     sprintf(buffer, "%c", '\0');
                     strcat(buffer, tmp);
-                    // if (strstr(buffer, "\n") != NULL) {
-                        // (*line_number)++;
-                    // }
                     (*smth_found) = 1;
                 }
             }
@@ -738,4 +755,4 @@ char** get_data_f_flag(char *filename, int *num_lines, int s_flag, char *argv[])
 
 // strcasestr работает только с английским текстом
 
-// -c вместе с -f или с -f и -i не работает, а если его сейчас включить, то он будет считать кол-во вхождений, а не строк
+// -n -f вместе могут окрашивать название файлов
