@@ -37,7 +37,6 @@ $
 
 
 
-Объяснения от самого линукса:
 -A, --show-all           equivalent to -vET
   -b, --number-nonblank    number nonempty output lines, overrides -n
   -e                       equivalent to -vE
@@ -46,7 +45,7 @@ $
   -s, --squeeze-blank      suppress repeated empty output lines
   -t                       equivalent to -vT
   -T, --show-tabs          display TAB characters as ^I
-  -u                       (ignored) (ЕЩЕ ОСТАЛОСЬ)
+  -u                       (ignored)
   -v, --show-nonprinting   use ^ and M- notation, except for LFD and TAB
       --help     display this help and exit
       --version  output version information and exit
@@ -56,7 +55,7 @@ $
 (    4
      5  Does the cat
 
-Объяснения от самого линукса:
+
 -A, --show-all           equivalent to -vET
 )
 
